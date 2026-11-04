@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "poker-backend"
+version = "0.1.0"
+description = "Backend for the simplified 6-max Texas Hold'em app (FastAPI + PostgreSQL)."
+authors = ["Poker exercise"]
+readme = "README.md"
+# src/ layout: the package lives under src/, main.py stays at the project root.
+packages = [{ include = "poker", from = "src" }]
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.14"
+fastapi = "0.115.6"
+uvicorn = { extras = ["standard"], version = "0.32.1" }
+psycopg = { extras = ["binary", "pool"], version = "3.2.3" }
+pydantic = "2.10.3"
+pydantic-settings = "2.6.1"
+pokerkit = ">=0.6,<0.8"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "8.3.4"
+httpx = "0.28.0"
+
+[tool.pytest.ini_options]
+# Make the src/ package and the root main.py importable in tests without installing.
+pythonpath = ["src", "."]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

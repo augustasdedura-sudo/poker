@@ -1,0 +1,41 @@
+# Run the whole stack with:  docker compose up -d --build
+# Then open http://localhost:3000  (no extra configuration needed).
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: poker
+      POSTGRES_PASSWORD: poker
+      POSTGRES_DB: poker
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      # Backend waits for this to pass before it starts.
+      test: ["CMD-SHELL", "pg_isready -U poker -d poker"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql://poker:poker@db:5432/poker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    environment:
+      # Server-side Next.js rewrite target (reachable inside the compose network).
+      # The browser only ever talks to http://localhost:3000.
+      BACKEND_URL: http://backend:8000
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+volumes:
+  db_data:
