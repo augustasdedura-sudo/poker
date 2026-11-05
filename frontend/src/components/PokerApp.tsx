@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { HandHistory } from "@/components/HandHistory";
-import { PlayingField } from "@/components/PlayingField";
+import { ActionBar } from "@/components/poker/ActionBar";
+import { LogPanel } from "@/components/poker/LogPanel";
+import { PokerTable } from "@/components/poker/PokerTable";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { createHand, fetchHands } from "@/lib/api";
 import {
   NO_ACTIONS,
@@ -22,6 +26,7 @@ export function PokerApp() {
   const [stack, setStack] = useState(DEFAULT_STACK);
   const [game, setGame] = useState<GameState | null>(null);
   const [history, setHistory] = useState<StoredHand[]>([]);
+  const [lastHand, setLastHand] = useState<StoredHand | null>(null);
   const [everActed, setEverActed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,13 +55,15 @@ export function PokerApp() {
 
   const dealNewHand = () => {
     setError(null);
+    setLastHand(null);
     setGame(startHand(stack));
   };
 
   const saveHand = async (finished: GameState) => {
     setBusy(true);
     try {
-      await createHand(toRecord(finished));
+      const stored = await createHand(toRecord(finished));
+      setLastHand(stored);
       await loadHistory();
     } catch (e) {
       setError(`Could not save hand: ${(e as Error).message}`);
@@ -70,36 +77,74 @@ export function PokerApp() {
     const next = applyAction(game, action);
     setGame(next);
     setEverActed(true);
-    if (next.complete) {
-      void saveHand(next);
-    }
+    if (next.complete) void saveHand(next);
   };
 
   const legal = game ? legalActions(game) : NO_ACTIONS;
+  const showActions = !!game && !game.complete;
 
   return (
-    <main className="mx-auto max-w-6xl p-4">
-      <h1 className="mb-4 text-2xl font-bold">6-max Texas Hold&apos;em</h1>
-      {error && (
-        <p className="mb-3 rounded-md border border-destructive/50 bg-destructive/10 p-2 text-sm text-destructive">
-          {error}
-        </p>
-      )}
-      <div className="grid gap-6 md:grid-cols-2">
-        <PlayingField
-          stackInput={stackInput}
-          onStackChange={setStackInput}
-          onApply={applyStack}
-          onReset={dealNewHand}
-          resetLabel={everActed ? "Reset" : "Start"}
-          log={game?.log ?? []}
-          legal={legal}
-          player={game?.toAct ?? null}
-          showActions={!!game && !game.complete}
-          busy={busy}
-          onAction={onAction}
-        />
-        <HandHistory hands={history} />
+    <main className="min-h-screen bg-[radial-gradient(1200px_600px_at_50%_-10%,#13233f_0%,#0a0f1c_60%)] text-slate-100">
+      <div className="mx-auto max-w-6xl px-4 py-5">
+        {/* Header */}
+        <header className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-xl font-bold tracking-tight">
+            <span className="text-teal-400">♠</span> 6-max Hold&apos;em
+          </h1>
+          <div className="flex items-end gap-2">
+            <label className="flex flex-col gap-1">
+              <span className="text-[11px] uppercase tracking-wider text-slate-400">Stacks</span>
+              <Input
+                type="number"
+                min={1}
+                value={stackInput}
+                onChange={(e) => setStackInput(e.target.value)}
+                className="h-9 w-28 border-slate-700 bg-slate-900 text-slate-100"
+              />
+            </label>
+            <Button
+              variant="outline"
+              className="h-9 border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800"
+              onClick={applyStack}
+            >
+              Apply
+            </Button>
+            <Button
+              className="h-9 bg-teal-500 font-semibold text-slate-950 hover:bg-teal-400"
+              onClick={dealNewHand}
+            >
+              {everActed ? "Reset" : "Start"}
+            </Button>
+          </div>
+        </header>
+
+        {error && (
+          <p className="mb-4 rounded-lg border border-rose-500/40 bg-rose-500/10 p-2 text-sm text-rose-300">
+            {error}
+          </p>
+        )}
+
+        {/* Table + actions */}
+        <section className="rounded-2xl border border-slate-800 bg-slate-900/40 p-4">
+          <PokerTable game={game} fallbackStack={stack} result={lastHand} />
+          <div className="mx-auto mt-4 max-w-2xl">
+            {showActions ? (
+              <ActionBar player={game!.toAct} legal={legal} disabled={busy} onAction={onAction} />
+            ) : (
+              <p className="py-2 text-center text-sm text-slate-400">
+                {game?.complete
+                  ? 'Hand complete — press "Reset" to deal the next one.'
+                  : 'Press "Start" to deal a hand.'}
+              </p>
+            )}
+          </div>
+        </section>
+
+        {/* Log + history */}
+        <section className="mt-5 grid gap-5 md:grid-cols-2">
+          <LogPanel log={game?.log ?? []} />
+          <HandHistory hands={history} />
+        </section>
       </div>
     </main>
   );

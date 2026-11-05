@@ -33,3 +33,11 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Dark app shell (outside @layer so it wins over the base body background). */
+html {
+  color-scheme: dark;
+}
+body {
+  background-color: #0a0f1c;
+}

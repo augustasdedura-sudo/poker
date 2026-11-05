@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { historyLines } from "@/lib/poker/format";
 import type { StoredHand } from "@/lib/poker/types";
 
@@ -10,23 +9,32 @@ interface Props {
 
 export function HandHistory({ hands }: Props) {
   return (
-    <div className="flex h-full flex-col gap-3">
-      <h2 className="text-lg font-semibold">Hand history</h2>
+    <div className="flex flex-col">
+      <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+        Hand history
+      </h2>
       {hands.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No hands played yet.</p>
+        <div className="rounded-xl border border-slate-700 bg-slate-950/70 p-3 text-sm text-slate-500">
+          No hands played yet.
+        </div>
       ) : (
-        <div className="flex flex-col gap-3 overflow-y-auto pr-1">
-          {hands.map((hand) => (
-            <Card key={hand.id} className="border-blue-300 bg-blue-50">
-              <CardContent className="space-y-1 p-3 font-mono text-xs leading-relaxed text-blue-950">
-                {historyLines(hand).map((line, i) => (
-                  <div key={i} className={i === 0 ? "font-semibold break-all" : "break-words"}>
+        <div className="flex max-h-80 flex-col gap-3 overflow-y-auto pr-1">
+          {hands.map((hand) => {
+            const [title, ...rest] = historyLines(hand);
+            return (
+              <div
+                key={hand.id}
+                className="rounded-xl border border-teal-500/30 bg-teal-500/5 p-3 font-mono text-[12px] leading-relaxed text-slate-200"
+              >
+                <div className="mb-1 break-all font-semibold text-teal-300">{title}</div>
+                {rest.map((line, i) => (
+                  <div key={i} className="break-words text-slate-300">
                     {line}
                   </div>
                 ))}
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
