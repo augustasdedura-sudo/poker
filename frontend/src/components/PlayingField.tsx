@@ -58,7 +58,7 @@ export function PlayingField({
 
       <div
         data-testid="play-log"
-        className="min-h-[16rem] flex-1 overflow-y-auto rounded-md border bg-muted/40 p-3 font-mono text-sm"
+        className="h-80 overflow-y-auto rounded-md border bg-muted/40 p-3 font-mono text-sm"
       >
         {log.length === 0 ? (
           <p className="text-muted-foreground">

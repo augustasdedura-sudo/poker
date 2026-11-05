@@ -33,6 +33,9 @@ class StreetIn(_Camel):
 
 
 class HandCreate(_Camel):
+    # The client generates the id up front (it is shown in the live play log), so
+    # the server honours it to keep the log and the stored hand consistent.
+    id: UUID | None = None
     stack: int = Field(gt=0)
     dealer: int = Field(ge=0, le=NUM_PLAYERS - 1)
     hole_cards: list[str]

@@ -47,7 +47,7 @@ def create_hand(payload: HandCreate, repo: HandRepository = Depends(get_reposito
         ) from exc
 
     hand = Hand(
-        id=uuid4(),
+        id=payload.id or uuid4(),
         stack=payload.stack,
         dealer=payload.dealer,
         hole_cards=payload.hole_cards,
