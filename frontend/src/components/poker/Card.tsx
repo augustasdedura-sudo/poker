@@ -37,7 +37,7 @@ export function PlayingCard({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-md bg-white shadow-md ring-1 ring-black/10",
+        "animate-card flex flex-col items-center justify-center rounded-md bg-white shadow-md ring-1 ring-black/10",
         SIZES[size],
       )}
     >

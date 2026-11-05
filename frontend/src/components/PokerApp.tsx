@@ -9,6 +9,7 @@ import { PokerTable } from "@/components/poker/PokerTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createHand, fetchHands } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import {
   NO_ACTIONS,
   applyAction,
@@ -30,6 +31,7 @@ export function PokerApp() {
   const [everActed, setEverActed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPanels, setShowPanels] = useState(false);
 
   const loadHistory = useCallback(async () => {
     try {
@@ -140,10 +142,19 @@ export function PokerApp() {
           </div>
         </section>
 
-        {/* Log + history */}
-        <section className="mt-5 grid gap-5 md:grid-cols-2">
-          <LogPanel log={game?.log ?? []} />
-          <HandHistory hands={history} />
+        {/* Log + history — hidden by default, kept mounted so they stay live */}
+        <section className="mt-5">
+          <button
+            type="button"
+            onClick={() => setShowPanels((v) => !v)}
+            className="mb-3 rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-slate-800"
+          >
+            {showPanels ? "Hide log & history" : "Show log & history"}
+          </button>
+          <div className={cn("grid gap-5 md:grid-cols-2", !showPanels && "hidden")}>
+            <LogPanel log={game?.log ?? []} />
+            <HandHistory hands={history} />
+          </div>
         </section>
       </div>
     </main>

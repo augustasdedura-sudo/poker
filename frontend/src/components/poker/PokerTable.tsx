@@ -1,6 +1,7 @@
 "use client";
 
 import { PlayingCard, CardSlot } from "@/components/poker/Card";
+import { Chips } from "@/components/poker/Chips";
 import { Seat, type SeatView } from "@/components/poker/Seat";
 import type { GameState } from "@/lib/poker/engine";
 import { splitCards } from "@/lib/poker/cards";
@@ -74,12 +75,15 @@ export function PokerTable({ game, fallbackStack, result }: Props) {
             "radial-gradient(ellipse at 50% 42%, #1b8265 0%, #0f5643 55%, #0a3a2e 100%)",
           boxShadow: "inset 0 0 60px rgba(0,0,0,0.55)",
         }}
-      />
+      >
+        <div className="absolute inset-[7%] rounded-[50%] border border-white/5" />
+      </div>
 
       {/* Center: pot + community board */}
       <div className="absolute left-1/2 top-1/2 flex w-full -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2">
-        <div className="rounded-full bg-black/35 px-3 py-1 text-sm font-semibold text-amber-300 ring-1 ring-amber-300/30">
-          Pot {collectedPot.toLocaleString()}
+        <div className="flex items-center gap-2 rounded-full bg-black/40 px-3 py-1 ring-1 ring-amber-300/25">
+          <span className="text-[10px] uppercase tracking-wider text-amber-200/70">Pot</span>
+          <Chips amount={collectedPot} size="md" />
         </div>
         <div className="flex gap-1.5">
           {Array.from({ length: 5 }, (_, i) =>
@@ -107,9 +111,8 @@ export function PokerTable({ game, fallbackStack, result }: Props) {
               className="absolute -translate-x-1/2 -translate-y-1/2"
               style={{ top: BET_POS[i].top, left: BET_POS[i].left }}
             >
-              <span className="flex items-center gap-1 rounded-full bg-black/55 px-2 py-0.5 text-[11px] font-semibold text-amber-200 ring-1 ring-amber-300/30">
-                <span className="h-2.5 w-2.5 rounded-full bg-amber-400 ring-1 ring-amber-200" />
-                {p.committedStreet.toLocaleString()}
+              <span className="rounded-full bg-black/55 px-2 py-1 ring-1 ring-white/10">
+                <Chips amount={p.committedStreet} />
               </span>
             </div>
           ) : null,

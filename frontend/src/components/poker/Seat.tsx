@@ -19,7 +19,7 @@ export interface SeatView {
 
 function Badge({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-bold leading-none", className)}>
+    <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-bold leading-none shadow", className)}>
       {children}
     </span>
   );
@@ -33,7 +33,7 @@ export function Seat({ seat }: { seat: SeatView }) {
       {/* Hole cards */}
       <div className={cn("flex gap-1 transition", seat.folded && "opacity-30")}>
         {seat.showCards && cards.length === 2 ? (
-          cards.map((c, i) => <PlayingCard key={i} card={c} size="sm" faceDown={!seat.showCards} />)
+          cards.map((c, i) => <PlayingCard key={i} card={c} size="sm" />)
         ) : (
           <>
             <PlayingCard faceDown />
@@ -42,35 +42,39 @@ export function Seat({ seat }: { seat: SeatView }) {
         )}
       </div>
 
-      {/* Name + stack plate */}
+      {/* Avatar + name/stack plate */}
       <div
         className={cn(
-          "relative w-[132px] rounded-xl border bg-slate-900/85 px-3 py-1.5 text-center backdrop-blur transition",
-          seat.toAct
-            ? "border-teal-400 shadow-[0_0_18px_rgba(45,212,191,0.45)]"
-            : "border-slate-700",
+          "relative flex w-[142px] items-center gap-2 rounded-xl border bg-slate-900/85 px-2.5 py-1.5 backdrop-blur transition",
+          seat.toAct ? "animate-seat border-teal-400" : "border-slate-700",
           seat.folded && "opacity-50",
         )}
       >
-        <div className="truncate text-xs font-semibold text-slate-100">{seat.name}</div>
-        <div className="font-mono text-[11px] text-teal-300">
-          {seat.allIn ? "ALL-IN" : `${seat.stack.toLocaleString()}`}
+        <div
+          className={cn(
+            "flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-600 to-slate-800 text-xs font-bold text-slate-200 ring-1 ring-white/10",
+            seat.toAct && "from-teal-500 to-cyan-700 text-slate-950",
+          )}
+        >
+          {seat.index + 1}
+        </div>
+        <div className="min-w-0 text-left">
+          <div className="truncate text-xs font-semibold text-slate-100">{seat.name}</div>
+          <div className="font-mono text-[11px] text-teal-300">
+            {seat.allIn ? "ALL-IN" : seat.stack.toLocaleString()}
+          </div>
         </div>
 
-        {/* Dealer button + blind markers */}
-        <div className="absolute -right-2 -top-2 flex gap-1">
-          {seat.isDealer && (
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-300 text-[10px] font-bold text-slate-900 shadow">
-              D
-            </span>
-          )}
-        </div>
+        {seat.isDealer && (
+          <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-amber-300 text-[10px] font-bold text-slate-900 shadow">
+            D
+          </span>
+        )}
         <div className="absolute -left-2 -top-2 flex gap-1">
           {seat.isSB && <Badge className="bg-sky-500 text-white">SB</Badge>}
           {seat.isBB && <Badge className="bg-indigo-500 text-white">BB</Badge>}
         </div>
 
-        {/* Result at showdown */}
         {seat.net !== undefined && seat.net !== 0 && (
           <div
             className={cn(
