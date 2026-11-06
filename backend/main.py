@@ -12,6 +12,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from poker.api import router
+from poker.bot import bot_router
 from poker.db import create_pool, init_schema
 
 
@@ -40,6 +41,7 @@ app.add_middleware(
 )
 
 app.include_router(router, prefix="/api")
+app.include_router(bot_router, prefix="/api")
 
 
 @app.get("/api/health")
