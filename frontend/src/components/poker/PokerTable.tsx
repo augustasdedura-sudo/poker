@@ -30,17 +30,22 @@ interface Props {
   game: GameState | null;
   fallbackStack: number;
   result: StoredHand | null;
+  hero: number; // the human's seat index
+  solo: boolean; // true = hide opponents' cards (single-player mode)
 }
 
-export function PokerTable({ game, fallbackStack, result }: Props) {
+export function PokerTable({ game, fallbackStack, result, hero, solo }: Props) {
   const dealer = game?.dealer ?? -1;
   const sb = game ? (dealer + 1) % 6 : -1;
   const bb = game ? (dealer + 2) % 6 : -1;
 
   const showResult = !!(game && game.complete && result && result.id === game.id);
+  // At a real showdown (2+ players still in at the end) opponents' cards are shown.
+  const showdown = !!(game && game.complete && game.players.filter((p) => !p.folded).length > 1);
 
   const seats: SeatView[] = Array.from({ length: 6 }, (_, i) => {
     const p = game?.players[i];
+    const reveal = !solo || i === hero || (showdown && !!p && !p.folded);
     return {
       index: i,
       name: playerLabel(i),
@@ -52,7 +57,8 @@ export function PokerTable({ game, fallbackStack, result }: Props) {
       isDealer: i === dealer,
       isSB: i === sb,
       isBB: i === bb,
-      showCards: !!p,
+      isHero: i === hero,
+      showCards: !!p && reveal,
       net: showResult ? result!.winnings[i] : undefined,
     };
   });

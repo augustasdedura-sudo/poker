@@ -47,6 +47,9 @@ describe("PokerApp integration", () => {
     await waitFor(() => expect(fetchMock).toHaveBeenCalled());
     expect(screen.getByText("No hands played yet.")).toBeInTheDocument();
 
+    // Use Manual mode so the human controls every seat (no bot auto-play).
+    await user.click(screen.getByRole("button", { name: "Manual" }));
+
     // Deal a hand, then fold around to the big blind (5 folds end the hand).
     await user.click(screen.getByRole("button", { name: "Start" }));
     for (let i = 0; i < 5; i++) {

@@ -13,6 +13,7 @@ export interface SeatView {
   isDealer: boolean;
   isSB: boolean;
   isBB: boolean;
+  isHero: boolean;
   showCards: boolean;
   net?: number;
 }
@@ -65,6 +66,11 @@ export function Seat({ seat }: { seat: SeatView }) {
           </div>
         </div>
 
+        {seat.isHero && (
+          <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded bg-teal-400 px-1.5 py-0.5 text-[10px] font-bold leading-none text-slate-950 shadow">
+            YOU
+          </span>
+        )}
         {seat.isDealer && (
           <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-amber-300 text-[10px] font-bold text-slate-900 shadow">
             D
