@@ -46,7 +46,7 @@ body {
 @keyframes cardIn {
   from {
     opacity: 0;
-    transform: translateY(-8px) scale(0.9);
+    transform: translateY(-26px) rotate(-6deg) scale(0.86);
   }
   to {
     opacity: 1;

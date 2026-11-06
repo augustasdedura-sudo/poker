@@ -15,16 +15,21 @@ export function PlayingCard({
   card,
   size = "sm",
   faceDown = false,
+  delay = 0,
 }: {
   card?: string;
   size?: Size;
   faceDown?: boolean;
+  delay?: number; // staggered deal-in delay, in ms
 }) {
+  const style = delay ? { animationDelay: `${delay}ms` } : undefined;
+
   if (faceDown || !card) {
     return (
       <div
+        style={style}
         className={cn(
-          "flex items-center justify-center rounded-md bg-gradient-to-br from-teal-500 to-cyan-800 ring-1 ring-black/30 shadow",
+          "animate-card flex items-center justify-center rounded-md bg-gradient-to-br from-teal-500 to-cyan-800 ring-1 ring-black/30 shadow",
           SIZES[size],
         )}
       >
@@ -36,6 +41,7 @@ export function PlayingCard({
   const { rank, symbol, color } = parseCard(card);
   return (
     <div
+      style={style}
       className={cn(
         "animate-card flex flex-col items-center justify-center rounded-md bg-white shadow-md ring-1 ring-black/10",
         SIZES[size],

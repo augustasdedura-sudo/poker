@@ -15,6 +15,7 @@ export interface SeatView {
   isBB: boolean;
   isHero: boolean;
   showCards: boolean;
+  label?: string; // best-hand label, e.g. "Pair, A's" (only when cards are shown)
   net?: number;
 }
 
@@ -26,19 +27,23 @@ function Badge({ children, className }: { children: React.ReactNode; className?:
   );
 }
 
-export function Seat({ seat }: { seat: SeatView }) {
+export function Seat({ seat, dealKey }: { seat: SeatView; dealKey: string }) {
   const cards = seat.holeCards ? splitCards(seat.holeCards) : [];
+  // Deal order: one card to each seat around the table, then the second card.
+  const dealDelay = (cardIdx: number) => (cardIdx * 6 + seat.index) * 70;
 
   return (
     <div className="flex flex-col items-center gap-1">
-      {/* Hole cards */}
+      {/* Hole cards (keyed by dealKey so the deal animation replays each hand) */}
       <div className={cn("flex gap-1 transition", seat.folded && "opacity-30")}>
         {seat.showCards && cards.length === 2 ? (
-          cards.map((c, i) => <PlayingCard key={i} card={c} size="sm" />)
+          cards.map((c, i) => (
+            <PlayingCard key={`${dealKey}-${i}`} card={c} size="sm" delay={dealDelay(i)} />
+          ))
         ) : (
           <>
-            <PlayingCard faceDown />
-            <PlayingCard faceDown />
+            <PlayingCard key={`${dealKey}-0`} faceDown delay={dealDelay(0)} />
+            <PlayingCard key={`${dealKey}-1`} faceDown delay={dealDelay(1)} />
           </>
         )}
       </div>
@@ -92,6 +97,13 @@ export function Seat({ seat }: { seat: SeatView }) {
           </div>
         )}
       </div>
+
+      {/* Best-hand label (shown only when this seat's cards are revealed) */}
+      {seat.label && (
+        <div className="mt-2 max-w-[142px] truncate rounded bg-slate-800/90 px-2 py-0.5 text-center text-[10px] font-medium text-teal-200 ring-1 ring-white/5">
+          {seat.label}
+        </div>
+      )}
     </div>
   );
 }

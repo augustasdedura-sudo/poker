@@ -6,6 +6,7 @@ import { Seat, type SeatView } from "@/components/poker/Seat";
 import type { GameState } from "@/lib/poker/engine";
 import { splitCards } from "@/lib/poker/cards";
 import { playerLabel } from "@/lib/poker/format";
+import { handLabel } from "@/lib/poker/handStrength";
 import type { StoredHand } from "@/lib/poker/types";
 
 const SEAT_POS = [
@@ -59,6 +60,7 @@ export function PokerTable({ game, fallbackStack, result, hero, solo }: Props) {
       isBB: i === bb,
       isHero: i === hero,
       showCards: !!p && reveal,
+      label: p && reveal ? handLabel(p.holeCards, game ? game.board : "") : undefined,
       net: showResult ? result!.winnings[i] : undefined,
     };
   });
@@ -94,7 +96,7 @@ export function PokerTable({ game, fallbackStack, result, hero, solo }: Props) {
         <div className="flex gap-1.5">
           {Array.from({ length: 5 }, (_, i) =>
             board[i] ? (
-              <PlayingCard key={i} card={board[i]} size="md" />
+              <PlayingCard key={i} card={board[i]} size="md" delay={i < 3 ? i * 90 : 0} />
             ) : (
               <CardSlot key={i} size="md" />
             ),
@@ -131,7 +133,7 @@ export function PokerTable({ game, fallbackStack, result, hero, solo }: Props) {
           className="absolute -translate-x-1/2 -translate-y-1/2"
           style={{ top: SEAT_POS[seat.index].top, left: SEAT_POS[seat.index].left }}
         >
-          <Seat seat={seat} />
+          <Seat seat={seat} dealKey={game?.id ?? "none"} />
         </div>
       ))}
     </div>

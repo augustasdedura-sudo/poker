@@ -93,3 +93,14 @@ export function madeHandStrength(hole: string, board: string): number {
 export function handStrength(hole: string, board: string): number {
   return board.length === 0 ? preflopStrength(hole) : madeHandStrength(hole, board);
 }
+
+/** Human-readable best-hand label for display, e.g. "Pair, A's" or "A High". */
+export function handLabel(hole: string, board: string): string {
+  const cards = [...splitCards(hole), ...splitCards(board)];
+  if (cards.length < 2) return "";
+  try {
+    return Hand.solve(cards).descr;
+  } catch {
+    return "";
+  }
+}
