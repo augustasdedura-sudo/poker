@@ -27,11 +27,12 @@ services:
       - "8000:8000"
 
   frontend:
-    build: ./frontend
-    environment:
-      # Server-side Next.js rewrite target (reachable inside the compose network).
-      # The browser only ever talks to http://localhost:3000.
-      BACKEND_URL: http://backend:8000
+    build:
+      context: ./frontend
+      args:
+        # Next.js /api rewrite target, reachable inside the compose network.
+        # It is baked in at build time; the browser only talks to localhost:3000.
+        BACKEND_URL: http://backend:8000
     depends_on:
       - backend
     ports:

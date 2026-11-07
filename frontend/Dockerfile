@@ -9,6 +9,11 @@ ENV NEXT_TELEMETRY_DISABLED=1
 COPY package.json package-lock.json* ./
 RUN npm install --no-audit --no-fund
 
+# Next.js bakes rewrites into the build output, so the backend address must be
+# known at build time; setting it only at runtime has no effect.
+ARG BACKEND_URL=http://backend:8000
+ENV BACKEND_URL=$BACKEND_URL
+
 # Application source (node_modules/.next excluded via .dockerignore).
 COPY . .
 RUN npm run build
