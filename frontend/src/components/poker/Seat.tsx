@@ -24,7 +24,7 @@ export interface SeatView {
 
 function Badge({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-bold leading-none shadow", className)}>
+    <span className={cn("rounded px-1.5 py-0.5 text-xs font-semibold leading-none shadow", className)}>
       {children}
     </span>
   );
@@ -46,7 +46,7 @@ export function Seat({ seat, dealKey }: { seat: SeatView; dealKey: string }) {
   // Deal order: one card to each seat around the table, then the second card.
   const dealDelay = (cardIdx: number) => (cardIdx * 6 + seat.index) * 70;
   const faceUp = seat.showCards && cards.length === 2;
-  const size = seat.isHero ? "lg" : "sm";
+  const size = seat.isHero ? "lg" : "md";
 
   return (
     <div className="relative flex flex-col items-center gap-1">
@@ -55,7 +55,7 @@ export function Seat({ seat, dealKey }: { seat: SeatView; dealKey: string }) {
         <div
           key={seat.flash.key}
           className={cn(
-            "animate-bubble pointer-events-none absolute -top-9 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-semibold leading-none shadow-lg shadow-black/40 ring-1",
+            "animate-bubble pointer-events-none absolute -top-11 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-lg px-3.5 py-2 text-base font-semibold leading-none shadow-lg shadow-black/40 ring-1",
             bubbleStyle(seat.flash.text),
           )}
         >
@@ -65,7 +65,7 @@ export function Seat({ seat, dealKey }: { seat: SeatView; dealKey: string }) {
 
       {/* Hole cards (keyed by dealKey so the deal animation replays each hand) */}
       {seat.sittingOut ? (
-        <div className="flex h-[58px] items-center text-xs font-medium text-slate-500">Sitting out</div>
+        <div className="flex h-[88px] items-center text-sm font-medium text-slate-400">Sitting out</div>
       ) : seat.isHero ? (
         // The human's hand: large and fanned so it reads at a glance.
         <div
@@ -97,8 +97,8 @@ export function Seat({ seat, dealKey }: { seat: SeatView; dealKey: string }) {
             ))
           ) : (
             <>
-              <PlayingCard key={`${dealKey}-0`} faceDown delay={dealDelay(0)} />
-              <PlayingCard key={`${dealKey}-1`} faceDown delay={dealDelay(1)} />
+              <PlayingCard key={`${dealKey}-0`} faceDown size={size} delay={dealDelay(0)} />
+              <PlayingCard key={`${dealKey}-1`} faceDown size={size} delay={dealDelay(1)} />
             </>
           )}
         </div>
@@ -107,14 +107,14 @@ export function Seat({ seat, dealKey }: { seat: SeatView; dealKey: string }) {
       {/* Avatar + name/stack plate */}
       <div
         className={cn(
-          "relative flex w-[144px] items-center gap-2 rounded-xl border bg-slate-900/90 px-3 py-2 shadow-lg shadow-black/30 transition-[border-color,opacity] duration-300 ease-out",
+          "relative flex w-[176px] items-center gap-3 rounded-xl border bg-slate-900/90 px-3 py-2 shadow-lg shadow-black/30 transition-[border-color,opacity] duration-300 ease-out",
           seat.toAct ? "animate-seat border-brass-400" : "border-white/[0.08]",
           seat.folded && "opacity-50",
         )}
       >
         <div
           className={cn(
-            "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ring-1 transition-colors duration-300 ease-out",
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold ring-1 transition-colors duration-300 ease-out",
             seat.toAct
               ? "bg-brass-400 text-brass-ink ring-brass-200/40"
               : "bg-slate-700 text-slate-200 ring-white/10",
@@ -123,19 +123,24 @@ export function Seat({ seat, dealKey }: { seat: SeatView; dealKey: string }) {
           {seat.index + 1}
         </div>
         <div className="min-w-0 text-left">
-          <div className="truncate text-xs font-medium text-slate-100">{seat.name}</div>
-          <div className={cn("font-mono text-xs tabular-nums", seat.allIn ? "text-clay-300" : "text-slate-400")}>
+          <div className="truncate text-sm font-medium leading-5 text-slate-50">{seat.name}</div>
+          <div
+            className={cn(
+              "font-mono text-[15px] font-medium leading-5 tabular-nums",
+              seat.allIn ? "text-clay-300" : "text-slate-200",
+            )}
+          >
             {seat.allIn ? "All-in" : stack.toLocaleString()}
           </div>
         </div>
 
         {seat.isHero && (
-          <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-slate-950 shadow">
+          <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold leading-none text-slate-950 shadow">
             You
           </span>
         )}
         {seat.isDealer && (
-          <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-b from-brass-300 to-brass-500 text-[10px] font-bold text-brass-ink ring-1 ring-black/30 shadow">
+          <span className="absolute -right-2.5 -top-2.5 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-b from-brass-300 to-brass-500 text-xs font-bold text-brass-ink ring-1 ring-black/30 shadow">
             D
           </span>
         )}
@@ -147,7 +152,7 @@ export function Seat({ seat, dealKey }: { seat: SeatView; dealKey: string }) {
         {seat.net !== undefined && seat.net !== 0 && (
           <div
             className={cn(
-              "absolute -bottom-2 left-1/2 -translate-x-1/2 rounded px-1.5 py-0.5 text-[10px] font-bold leading-none shadow",
+              "absolute -bottom-3 left-1/2 -translate-x-1/2 rounded px-2 py-1 text-sm font-semibold tabular-nums leading-none shadow",
               seat.net > 0 ? "bg-win text-white" : "bg-clay-600 text-white",
             )}
           >
@@ -158,7 +163,7 @@ export function Seat({ seat, dealKey }: { seat: SeatView; dealKey: string }) {
 
       {/* Best-hand label (shown only when this seat's cards are revealed) */}
       {seat.label && (
-        <div className="mt-2 max-w-[142px] truncate rounded bg-slate-800/90 px-2 py-0.5 text-center text-[10px] font-medium text-slate-300 ring-1 ring-white/5">
+        <div className="mt-3 max-w-[176px] truncate rounded-md bg-slate-800/90 px-2.5 py-1 text-center text-sm font-medium text-slate-100 ring-1 ring-white/5">
           {seat.label}
         </div>
       )}

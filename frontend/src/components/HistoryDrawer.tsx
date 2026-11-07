@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { X } from "lucide-react";
 
 import { HandHistory } from "@/components/HandHistory";
+import { Button } from "@/components/ui/button";
 import { LogPanel } from "@/components/poker/LogPanel";
 import type { LogEntry } from "@/lib/poker/engine";
 import type { StoredHand } from "@/lib/poker/types";
@@ -51,15 +52,15 @@ export function HistoryDrawer({ open, onClose, log, hands }: Props) {
       >
         <div className="flex items-center justify-between">
           <h2 className="text-base font-medium text-slate-100">Log and history</h2>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon"
             aria-label="Close log and history"
             tabIndex={open ? 0 : -1}
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors duration-150 ease-out hover:bg-slate-800 hover:text-slate-100"
           >
-            <X size={18} strokeWidth={1.5} />
-          </button>
+            <X strokeWidth={1.5} />
+          </Button>
         </div>
         <LogPanel log={log} />
         <HandHistory hands={hands} />

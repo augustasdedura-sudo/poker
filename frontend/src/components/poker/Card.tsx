@@ -5,12 +5,12 @@ type Size = "sm" | "md" | "lg";
 
 const SIZES: Record<Size, string> = {
   sm: "w-10 h-[58px]",
-  md: "w-12 h-[70px]",
-  lg: "w-[78px] h-[110px]",
+  md: "w-[62px] h-[88px]", // opponents
+  lg: "w-[84px] h-[118px]", // your hand and the board
 };
 
-const RANK_TEXT: Record<Size, string> = { sm: "text-sm", md: "text-lg", lg: "text-3xl" };
-const SUIT_TEXT: Record<Size, string> = { sm: "text-lg", md: "text-2xl", lg: "text-5xl" };
+const RANK_TEXT: Record<Size, string> = { sm: "text-sm", md: "text-2xl", lg: "text-[34px]" };
+const SUIT_TEXT: Record<Size, string> = { sm: "text-lg", md: "text-[32px]", lg: "text-5xl" };
 
 export function PlayingCard({
   card,

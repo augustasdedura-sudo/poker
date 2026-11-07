@@ -196,8 +196,8 @@ export function PokerTable({ game, fallbackStack, result, hero, solo, flash }: P
 
       {/* Center: pot + community board */}
       <div className="absolute left-1/2 top-1/2 flex w-full -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-3">
-        <div className="flex items-center gap-2 rounded-full bg-black/35 px-3 py-1 ring-1 ring-white/[0.08]">
-          <span className="text-xs font-medium text-slate-300">Pot</span>
+        <div className="flex items-center gap-2.5 rounded-full bg-black/40 px-4 py-1.5 ring-1 ring-white/[0.08]">
+          <span className="text-sm font-medium text-slate-200">Pot</span>
           <Chips amount={collectedPot} size="md" />
         </div>
         <div className="flex gap-2">
@@ -210,7 +210,7 @@ export function PokerTable({ game, fallbackStack, result, hero, solo, flash }: P
           )}
         </div>
         {game?.complete && (
-          <div className="animate-enter rounded-full bg-black/35 px-3 py-1 text-xs text-slate-200 ring-1 ring-white/[0.08]">
+          <div className="animate-enter rounded-full bg-black/40 px-4 py-1.5 text-sm font-medium text-slate-100 ring-1 ring-white/[0.08]">
             Hand complete &middot; final pot {game.pot.toLocaleString()}
           </div>
         )}
@@ -226,7 +226,7 @@ export function PokerTable({ game, fallbackStack, result, hero, solo, flash }: P
               className="animate-chips absolute"
               style={{ top: BET_POS[i].top, left: BET_POS[i].left, ...pushVector(i) }}
             >
-              <span className="rounded-full bg-black/40 px-2 py-1 ring-1 ring-white/[0.08]">
+              <span className="rounded-full bg-black/50 px-2.5 py-1.5 ring-1 ring-white/[0.08]">
                 <Chips amount={p.committedStreet} />
               </span>
             </div>

@@ -27,7 +27,7 @@ export function Chips({
 }) {
   const shown = useTween(amount);
   const color = chipColor(amount);
-  const disc = size === "md" ? 18 : 14;
+  const disc = size === "md" ? 22 : 18;
   const offset = size === "md" ? 4 : 3;
   const chips = [0, 1, 2];
 
@@ -55,7 +55,7 @@ export function Chips({
       <span
         className={cn(
           "font-mono font-medium tabular-nums text-slate-100",
-          size === "md" ? "text-sm" : "text-xs",
+          size === "md" ? "text-lg" : "text-[15px]",
         )}
       >
         {shown.toLocaleString()}

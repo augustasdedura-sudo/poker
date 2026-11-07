@@ -262,7 +262,7 @@ export function PokerApp() {
       <div className="mx-auto max-w-[1440px] px-6 py-5">
         {/* Header */}
         <header className="relative z-10 mb-4 flex flex-wrap items-center justify-between gap-4">
-          <h1 className="text-xl font-semibold tracking-tight text-slate-50">
+          <h1 className="text-lg font-semibold leading-none text-slate-50">
             <span className="text-brass-400">♠</span> 6-max Hold&apos;em
           </h1>
           <div className="flex flex-wrap items-end gap-2">
@@ -282,7 +282,7 @@ export function PokerApp() {
                       setTable(null);
                     }}
                     className={cn(
-                      "rounded-md px-2.5 py-1.5 font-medium transition-colors",
+                      "flex h-8 items-center rounded-md px-3 font-medium duration-150 ease-out transition-colors",
                       mode === m
                         ? "bg-slate-700 text-slate-50 shadow-sm"
                         : "text-slate-400 hover:text-slate-200",
@@ -303,7 +303,7 @@ export function PokerApp() {
                       type="button"
                       onClick={() => setDifficulty(d)}
                       className={cn(
-                        "rounded-md px-2.5 py-1.5 font-medium capitalize transition-colors",
+                        "flex h-8 items-center rounded-md px-3 font-medium duration-150 ease-out capitalize transition-colors",
                         difficulty === d
                           ? "bg-slate-700 text-slate-50 shadow-sm"
                           : "text-slate-400 hover:text-slate-200",
@@ -324,11 +324,7 @@ export function PokerApp() {
                     {heroStackShown.toLocaleString()}
                   </div>
                 </div>
-                <Button
-                  variant="outline"
-                  className="h-9 border-white/[0.1] bg-slate-900 text-slate-100 hover:bg-slate-800 hover:text-slate-50"
-                  onClick={leaveTable}
-                >
+                <Button variant="outline" onClick={leaveTable}>
                   Leave table
                 </Button>
               </>
@@ -341,13 +337,10 @@ export function PokerApp() {
                     min={BIG_BLIND}
                     value={stackInput}
                     onChange={(e) => setStackInput(e.target.value)}
-                    className="h-9 w-28 border-slate-700 bg-slate-900 text-slate-100"
+                    className="h-9 w-28 rounded-lg font-mono tabular-nums"
                   />
                 </label>
-                <Button
-                  className="h-9 bg-brass-400 font-semibold text-brass-ink hover:bg-brass-300"
-                  onClick={sitDown}
-                >
+                <Button variant="primary" onClick={sitDown}>
                   Sit down
                 </Button>
               </>
@@ -360,34 +353,27 @@ export function PokerApp() {
                     min={1}
                     value={stackInput}
                     onChange={(e) => setStackInput(e.target.value)}
-                    className="h-9 w-28 border-slate-700 bg-slate-900 text-slate-100"
+                    className="h-9 w-28 rounded-lg font-mono tabular-nums"
                   />
                 </label>
-                <Button
-                  variant="outline"
-                  className="h-9 border-white/[0.1] bg-slate-900 text-slate-100 hover:bg-slate-800 hover:text-slate-50"
-                  onClick={applyStack}
-                >
+                <Button variant="outline" onClick={applyStack}>
                   Apply
                 </Button>
-                <Button
-                  className="h-9 bg-brass-400 font-semibold text-brass-ink hover:bg-brass-300"
-                  onClick={dealNewHand}
-                >
+                <Button variant="primary" onClick={dealNewHand}>
                   {everActed ? "Reset" : "Start"}
                 </Button>
               </>
             )}
 
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="icon"
               aria-label="Log and history"
               title="Log and history (H)"
               onClick={() => setShowPanels(true)}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors duration-150 ease-out hover:bg-slate-800 hover:text-slate-100"
             >
-              <ScrollText size={18} strokeWidth={1.5} />
-            </button>
+              <ScrollText strokeWidth={1.5} />
+            </Button>
           </div>
         </header>
 
@@ -400,23 +386,19 @@ export function PokerApp() {
         {/* Table + actions */}
         <section className="animate-enter">
           <PokerTable game={game} fallbackStack={seated ? heroStack : stack} result={lastHand} hero={HERO} solo={isSolo} flash={flash} />
-          <div className="mx-auto mt-4 max-w-2xl">
+          <div className="mx-auto mt-4 max-w-3xl">
             {heroTurn ? (
               <ActionBar player={game!.toAct} legal={legal} disabled={busy} onAction={onAction} />
             ) : heroBusted ? (
               <div className="animate-enter flex flex-col items-center gap-3 rounded-2xl border border-clay-500/30 bg-slate-900 p-4 text-center">
                 <p className="text-sm font-medium text-clay-300">
-                  You&apos;re out of chips.
+                  You&apos;re out of chips
                 </p>
                 <div className="flex gap-2">
-                  <Button className="bg-brass-400 font-semibold text-brass-ink hover:bg-brass-300" onClick={rebuyHero}>
+                  <Button variant="primary" onClick={rebuyHero}>
                     Rebuy {buyIn.toLocaleString()}
                   </Button>
-                  <Button
-                    variant="outline"
-                    className="border-white/[0.1] bg-slate-900 text-slate-100 hover:bg-slate-800 hover:text-slate-50"
-                    onClick={leaveTable}
-                  >
+                  <Button variant="outline" onClick={leaveTable}>
                     Leave table
                   </Button>
                 </div>
@@ -424,17 +406,13 @@ export function PokerApp() {
             ) : tableTooSmall ? (
               <div className="animate-enter flex flex-col items-center gap-3 rounded-2xl border border-white/[0.08] bg-slate-900 p-4 text-center">
                 <p className="text-sm font-medium text-slate-200">
-                  You busted the table — everyone else is out of chips.
+                  You busted the table — everyone else is out of chips
                 </p>
                 <div className="flex gap-2">
-                  <Button className="bg-brass-400 font-semibold text-brass-ink hover:bg-brass-300" onClick={refillTable}>
+                  <Button variant="primary" onClick={refillTable}>
                     Reseat opponents
                   </Button>
-                  <Button
-                    variant="outline"
-                    className="border-white/[0.1] bg-slate-900 text-slate-100 hover:bg-slate-800 hover:text-slate-50"
-                    onClick={leaveTable}
-                  >
+                  <Button variant="outline" onClick={leaveTable}>
                     Leave with {heroStack.toLocaleString()}
                   </Button>
                 </div>
@@ -442,7 +420,7 @@ export function PokerApp() {
             ) : seated && game?.complete ? (
               <p
                 className={cn(
-                  "animate-enter py-3 text-center text-sm font-medium",
+                  "animate-enter py-3 text-center text-base font-medium",
                   heroNet > 0 ? "text-[#8cc7a0]" : heroNet < 0 ? "text-clay-300" : "text-slate-400",
                 )}
               >
@@ -453,16 +431,16 @@ export function PokerApp() {
                     : "Next hand dealing…"}
               </p>
             ) : botTurn ? (
-              <p className="py-3 text-center text-sm text-slate-400">Opponents are thinking…</p>
+              <p className="py-3 text-center text-base text-slate-300">Opponents are thinking…</p>
             ) : (
               <p className="py-2 text-center text-sm text-slate-400">
                 {game?.complete
-                  ? 'Hand complete — press "Reset" to deal the next one.'
+                  ? 'Hand complete — press "Reset" to deal the next one'
                   : seated
                     ? "Dealing…"
                     : isSolo
-                      ? 'Press "Sit down" to take a seat.'
-                      : 'Press "Start" to deal a hand.'}
+                      ? 'Press "Sit down" to take a seat'
+                      : 'Press "Start" to deal a hand'}
               </p>
             )}
           </div>
