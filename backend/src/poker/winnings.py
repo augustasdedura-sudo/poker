@@ -39,6 +39,9 @@ _AUTOMATIONS = (
     Automation.ANTE_POSTING,
     Automation.BET_COLLECTION,
     Automation.BLIND_OR_STRADDLE_POSTING,
+    # In cash-game mode pokerkit pauses on an all-in to ask how many times to run
+    # the board out; we always run it once, so let it pick the default itself.
+    Automation.RUNOUT_COUNT_SELECTION,
     Automation.HOLE_CARDS_SHOWING_OR_MUCKING,
     Automation.HAND_KILLING,
     Automation.CHIPS_PUSHING,
@@ -47,8 +50,29 @@ _AUTOMATIONS = (
 
 
 def seat_order(dealer: int) -> list[int]:
-    """Player indices in pokerkit position order (small blind first, dealer last)."""
+    """Player indices in pokerkit position order (small blind first, dealer last).
+
+    Full-ring (six funded players) convenience used by tests; the general,
+    short-handed-aware ordering is :func:`position_order`.
+    """
     return [(dealer + i) % NUM_PLAYERS for i in range(1, NUM_PLAYERS)] + [dealer]
+
+
+def position_order(dealer: int, stacks: list[int]) -> list[int]:
+    """Live seats in pokerkit position order for any table size.
+
+    A *live* seat is one that sat the hand with chips (``stacks[seat] > 0``);
+    busted/sitting-out seats (stack 0) are skipped. Seats are listed in pokerkit's
+    position order: walking from the seat after the button around to the button
+    (button last). For three or more players this is [SB, BB, ..., button]; for
+    heads-up it is [BB, button] -- which is exactly how pokerkit seats a two-handed
+    game (the button posts the small blind and acts first, but is listed last).
+    """
+    return [
+        (dealer + i) % NUM_PLAYERS
+        for i in range(1, NUM_PLAYERS + 1)
+        if stacks[(dealer + i) % NUM_PLAYERS] > 0
+    ]
 
 
 def _drive_allin(state, to_level: int, current_bet: int) -> None:
@@ -61,14 +85,28 @@ def _drive_allin(state, to_level: int, current_bet: int) -> None:
         state.check_or_call()
 
 
-def compute(stack: int, dealer: int, hole_cards: list[str], streets: list[StreetPlay]) -> tuple[list[int], int]:
+def compute(
+    stacks: int | list[int],
+    dealer: int,
+    hole_cards: list[str],
+    streets: list[StreetPlay],
+) -> tuple[list[int], int]:
     """Return ``(winnings, pot)``.
+
+    ``stacks`` is the per-seat starting stack (index 0..5); a seat with stack 0 is
+    sitting out and takes no part in the hand. For backward compatibility a single
+    ``int`` means a full ring where every seat started with that stack.
 
     ``winnings`` is net chips per player index (sums to 0). ``pot`` is the total
     chips contributed across the hand (blinds included).
     """
-    order = seat_order(dealer)
-    pos_of = {player: pos for pos, player in enumerate(order)}
+    if isinstance(stacks, int):
+        stacks = [stacks] * NUM_PLAYERS
+
+    order = position_order(dealer, stacks)  # live seats, SB first, button last
+    count = len(order)
+    if count < 2:
+        raise ValueError("a hand needs at least two funded players")
 
     state = NoLimitTexasHoldem.create_state(
         _AUTOMATIONS,
@@ -76,13 +114,13 @@ def compute(stack: int, dealer: int, hole_cards: list[str], streets: list[Street
         0,  # antes
         (SMALL_BLIND, BIG_BLIND),  # blinds: position 0 = SB, position 1 = BB
         BIG_BLIND,  # min bet / min raise increment
-        stack,  # starting stack, same for every player
-        NUM_PLAYERS,
+        tuple(stacks[seat] for seat in order),  # per-seat starting stacks, in position order
+        count,
         mode=Mode.CASH_GAME,  # allow a fold when checking is possible (faithful replay)
     )
 
     # Deal hole cards in pokerkit position order (small blind first).
-    for pos in range(NUM_PLAYERS):
+    for pos in range(count):
         state.deal_hole(hole_cards[order[pos]])
 
     # Track contributions ourselves to compute the pot. (pokerkit's pot is pushed
@@ -91,26 +129,28 @@ def compute(stack: int, dealer: int, hole_cards: list[str], streets: list[Street
 
     for sp in streets:
         if sp.board:
-            # Reveal this street's board before its betting round.
-            state.burn_card("??")
+            # Reveal this street's board before its betting round. When everyone is
+            # already all-in pokerkit runs the board out without a burn pending.
+            if state.card_burning_status:
+                state.burn_card("??")
             state.deal_board(sp.board)
 
         committed_street = [0] * NUM_PLAYERS  # chips in this round, per player index
         current_bet = 0
 
         if sp.street == Street.PREFLOP:
-            # pokerkit posts the blinds automatically; mirror them in our tracking.
-            sb, bb = order[0], order[1]
-            sb_amt, bb_amt = min(SMALL_BLIND, stack), min(BIG_BLIND, stack)
-            committed_street[sb] += sb_amt
-            committed_street[bb] += bb_amt
-            contributed[sb] += sb_amt
-            contributed[bb] += bb_amt
-            current_bet = bb_amt
+            # pokerkit posts the blinds automatically (and seats SB/BB differently
+            # heads-up), so read the posted amounts straight from the state rather
+            # than re-deriving which position is which.
+            for pos, seat in enumerate(order):
+                posted = int(state.bets[pos])
+                committed_street[seat] += posted
+                contributed[seat] += posted
+            current_bet = max(committed_street)
 
         for action in sp.actions:
             p = action.player
-            remaining = stack - contributed[p]
+            remaining = stacks[p] - contributed[p]
 
             if action.kind == ActionKind.FOLD:
                 state.fold()
@@ -155,4 +195,4 @@ def compute(stack: int, dealer: int, hole_cards: list[str], streets: list[Street
 
 
 def compute_for_hand(hand: Hand) -> tuple[list[int], int]:
-    return compute(hand.stack, hand.dealer, hand.hole_cards, hand.streets)
+    return compute(hand.stacks, hand.dealer, hand.hole_cards, hand.streets)

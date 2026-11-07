@@ -37,9 +37,10 @@ def get_repository(request: Request):
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=HandOut)
 def create_hand(payload: HandCreate, repo: HandRepository = Depends(get_repository)) -> HandOut:
     streets = payload.to_street_plays()
+    stacks = payload.seat_stacks()
     try:
         # pokerkit validates the hand while replaying it; an illegal hand raises.
-        winnings, pot = compute(payload.stack, payload.dealer, payload.hole_cards, streets)
+        winnings, pot = compute(stacks, payload.dealer, payload.hole_cards, streets)
     except Exception as exc:  # noqa: BLE001 - surface any replay/validation failure as 422
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -55,6 +56,7 @@ def create_hand(payload: HandCreate, repo: HandRepository = Depends(get_reposito
         winnings=winnings,
         pot=pot,
         created_at=datetime.now(timezone.utc),
+        stacks=stacks,
     )
     repo.add(hand)
     return HandOut.from_domain(hand)

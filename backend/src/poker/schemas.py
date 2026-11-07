@@ -40,6 +40,9 @@ class HandCreate(_Camel):
     dealer: int = Field(ge=0, le=NUM_PLAYERS - 1)
     hole_cards: list[str]
     streets: list[StreetIn]
+    # Per-seat starting stacks (index 0..5). Optional: when omitted the hand is a
+    # full ring where every seat started with ``stack``. A seat with stack 0 sat out.
+    stacks: list[int] | None = None
 
     @field_validator("hole_cards")
     @classmethod
@@ -47,6 +50,16 @@ class HandCreate(_Camel):
         if len(value) != NUM_PLAYERS:
             raise ValueError(f"expected {NUM_PLAYERS} hole-card entries, got {len(value)}")
         return value
+
+    @field_validator("stacks")
+    @classmethod
+    def _six_stacks(cls, value: list[int] | None) -> list[int] | None:
+        if value is not None and len(value) != NUM_PLAYERS:
+            raise ValueError(f"expected {NUM_PLAYERS} stack entries, got {len(value)}")
+        return value
+
+    def seat_stacks(self) -> list[int]:
+        return self.stacks if self.stacks is not None else [self.stack] * NUM_PLAYERS
 
     def to_street_plays(self) -> list[StreetPlay]:
         return [
@@ -68,6 +81,7 @@ class HandOut(_Camel):
     winnings: list[int]
     pot: int
     created_at: datetime
+    stacks: list[int]
 
     @classmethod
     def from_domain(cls, hand: Hand) -> "HandOut":
@@ -75,6 +89,7 @@ class HandOut(_Camel):
             id=hand.id,
             stack=hand.stack,
             dealer=hand.dealer,
+            stacks=hand.stacks,
             hole_cards=hand.hole_cards,
             streets=[
                 StreetIn(

@@ -43,6 +43,8 @@ def _street_from_dict(data: dict) -> StreetPlay:
 
 
 def _row_to_hand(row: dict) -> Hand:
+    # Rows written before the ``stacks`` column store ``[]``; ``Hand`` then fills a
+    # full ring of ``stack`` in __post_init__.
     return Hand(
         id=row["id"],
         stack=row["stack"],
@@ -52,6 +54,7 @@ def _row_to_hand(row: dict) -> Hand:
         winnings=list(row["winnings"]),
         pot=row["pot"],
         created_at=row["created_at"],
+        stacks=list(row.get("stacks") or []),
     )
 
 
@@ -78,8 +81,8 @@ class PostgresHandRepository:
     def add(self, hand: Hand) -> Hand:
         self._conn.execute(
             """
-            INSERT INTO hands (id, stack, dealer, hole_cards, streets, winnings, pot, created_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO hands (id, stack, dealer, hole_cards, streets, winnings, pot, created_at, stacks)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             """,
             (
                 hand.id,
@@ -90,6 +93,7 @@ class PostgresHandRepository:
                 Jsonb(hand.winnings),
                 hand.pot,
                 hand.created_at,
+                Jsonb(hand.stacks),
             ),
         )
         self._conn.commit()

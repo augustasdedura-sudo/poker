@@ -70,13 +70,21 @@ class Hand:
     """A complete, finished hand ready to be stored and shown in history."""
 
     id: UUID
-    stack: int  # starting stack, identical for all six players
+    stack: int  # representative starting stack (the table buy-in); see ``stacks``
     dealer: int  # dealer/button player index 0..5
     hole_cards: list[str]  # index 0..5, e.g. "Tc2c"
     streets: list[StreetPlay]
     winnings: list[int]  # net chips per player index (sums to 0)
     pot: int  # total chips contributed across the hand
     created_at: datetime
+    # Per-seat starting stacks (index 0..5). In a cash game stacks differ between
+    # hands and a seat with stack 0 sat the hand out. Defaults to a full ring of
+    # ``stack`` so older rows and single-stack callers keep working.
+    stacks: list[int] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        if not self.stacks:
+            self.stacks = [self.stack] * NUM_PLAYERS
 
 
 def small_blind_seat(dealer: int) -> int:
