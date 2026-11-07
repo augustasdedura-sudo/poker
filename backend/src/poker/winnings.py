@@ -155,8 +155,19 @@ def compute(
             if action.kind == ActionKind.FOLD:
                 state.fold()
             elif action.kind == ActionKind.CHECK:
+                # pokerkit's check_or_call() would silently turn an illegal check
+                # into a call, so guard it here to match the client's rules: you
+                # may only check when you have nothing to call.
+                if current_bet > committed_street[p]:
+                    raise ValueError(
+                        f"player {p} cannot check facing a bet of {current_bet}"
+                    )
                 state.check_or_call()
             elif action.kind == ActionKind.CALL:
+                # Likewise reject a call when there is no outstanding bet (the
+                # exercise's own example of an action that must be disabled).
+                if current_bet <= committed_street[p]:
+                    raise ValueError(f"player {p} cannot call with no bet to call")
                 chips = min(current_bet - committed_street[p], remaining)
                 contributed[p] += chips
                 committed_street[p] += chips

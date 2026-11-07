@@ -127,6 +127,30 @@ def test_heads_up_button_is_small_blind_and_folds():
     assert pot == 40
 
 
+def test_illegal_check_facing_a_bet_is_rejected():
+    # Dealer P3 (idx2). UTG (P5) faces the big blind and cannot check.
+    holes = ["AcKc", "QdJd", "9h8h", "7s6s", "5c4c", "2d3d"]
+    streets = [StreetPlay(Street.PREFLOP, [x(5)], "")]
+    try:
+        compute(10000, 2, holes, streets)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("expected an illegal check to be rejected")
+
+
+def test_illegal_call_with_no_bet_is_rejected():
+    # Big blind has the option (nothing to call) -- a call there is illegal.
+    holes = ["AcKc", "QdJd", "9h8h", "7s6s", "5c4c", "2d3d"]
+    streets = [StreetPlay(Street.PREFLOP, [f(5), f(0), f(1), f(2), c(3), c(4)], "")]
+    try:
+        compute(10000, 2, holes, streets)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("expected an illegal call to be rejected")
+
+
 def test_varying_stacks_short_all_in_called_and_loses():
     # Heads-up with unequal stacks: short button (100) jams, deep BB (300) calls
     # and wins at showdown. The short stack can only lose its 100.
