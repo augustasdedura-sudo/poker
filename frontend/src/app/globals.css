@@ -3,24 +3,27 @@
 @tailwind utilities;
 
 @layer base {
+  /* Card-room theme. One warm charcoal ramp for every surface and text role,
+     brass as the single accent, clay only for destructive. These mirror the
+     `slate` / `brass` / `clay` scales in tailwind.config.ts. */
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --background: 30 6% 7%; /* #121110 page */
+    --foreground: 39 27% 90%; /* #ede8df primary text */
+    --card: 36 10% 10%; /* #1c1a17 raised surface */
+    --card-foreground: 39 27% 90%;
+    --primary: 39 59% 60%; /* #d6ac5e brass */
+    --primary-foreground: 41 57% 7%; /* #1d1608 brass ink */
+    --secondary: 33 9% 20%; /* #38342f */
+    --secondary-foreground: 40 41% 94%;
+    --muted: 34 9% 15%; /* #2a2723 */
+    --muted-foreground: 38 8% 63%; /* #a9a296 secondary text */
+    --accent: 34 9% 15%;
+    --accent-foreground: 39 27% 90%;
+    --destructive: 11 53% 50%; /* #c4553d clay */
+    --destructive-foreground: 0 0% 100%;
+    --border: 36 8% 17%; /* hairline */
+    --input: 36 8% 20%;
+    --ring: 39 59% 60%; /* brass focus ring */
     --radius: 0.5rem;
   }
 }
@@ -29,24 +32,30 @@
   * {
     @apply border-border;
   }
+  html {
+    color-scheme: dark;
+  }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background font-sans text-foreground antialiased;
   }
 }
 
-/* Dark app shell (outside @layer so it wins over the base body background). */
-html {
-  color-scheme: dark;
-}
-body {
-  background-color: #0a0f1c;
+/* ---- Motion ------------------------------------------------------------
+   One easing curve (quick start, soft landing) and three durations:
+   160ms feedback, 280ms state changes, 480ms things entering the table. */
+:root {
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Cards deal in with a small fade/slide. */
-@keyframes cardIn {
+/* Hole cards slide out from the middle of the table toward each seat.
+   --deal-x / --deal-y are set per seat (the vector back to the dealer's spot). */
+@keyframes cardDeal {
   from {
     opacity: 0;
-    transform: translateY(-26px) rotate(-6deg) scale(0.86);
+    transform: translate(var(--deal-x, 0px), var(--deal-y, -24px)) scale(0.72);
+  }
+  60% {
+    opacity: 1;
   }
   to {
     opacity: 1;
@@ -54,28 +63,110 @@ body {
   }
 }
 .animate-card {
-  animation: cardIn 0.28s ease-out both;
+  animation: cardDeal 480ms var(--ease) both;
 }
 
-/* Pulsing ring on the player whose turn it is. */
-@keyframes seatPulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.5);
+/* Community cards turn over in place. */
+@keyframes cardFlip {
+  from {
+    opacity: 0;
+    transform: perspective(600px) rotateY(-90deg) translateY(-6px);
   }
-  70% {
-    box-shadow: 0 0 0 8px rgba(45, 212, 191, 0);
+  45% {
+    opacity: 1;
   }
-  100% {
-    box-shadow: 0 0 0 0 rgba(45, 212, 191, 0);
+  to {
+    opacity: 1;
+    transform: perspective(600px) rotateY(0deg);
+  }
+}
+.animate-flip {
+  animation: cardFlip 480ms var(--ease) both;
+  backface-visibility: hidden;
+}
+
+/* Bet chips are pushed out from the player toward the pot.
+   --push-x / --push-y point back toward the seat they came from. */
+@keyframes chipPush {
+  from {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--push-x, 0px)), calc(-50% + var(--push-y, 0px))) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+.animate-chips {
+  animation: chipPush 280ms var(--ease) both;
+}
+
+/* The seat whose turn it is: a steady brass ring, with one soft swell as the
+   turn arrives (no endless pulsing). */
+@keyframes seatOn {
+  from {
+    box-shadow: 0 0 0 0 rgba(214, 172, 94, 0.5);
+  }
+  to {
+    box-shadow: 0 0 0 7px rgba(214, 172, 94, 0);
   }
 }
 .animate-seat {
-  animation: seatPulse 1.8s ease-out infinite;
+  animation: seatOn 600ms var(--ease) both;
+}
+
+/* Action callout: rises in, holds, then fades away. */
+@keyframes bubble {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  12% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  85% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -6px);
+  }
+}
+.animate-bubble {
+  animation: bubble 2000ms var(--ease) forwards;
+}
+
+/* The page's one entrance on load. */
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-enter {
+  animation: enter 480ms var(--ease) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-card,
-  .animate-seat {
+  .animate-flip,
+  .animate-chips,
+  .animate-seat,
+  .animate-bubble,
+  .animate-enter {
     animation: none;
+  }
+  .animate-chips {
+    transform: translate(-50%, -50%);
+  }
+  /* Without the keyframe the callout must not linger on screen. */
+  .animate-bubble {
+    opacity: 0;
   }
 }

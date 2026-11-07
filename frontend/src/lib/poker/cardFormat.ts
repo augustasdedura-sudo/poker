@@ -9,10 +9,10 @@ export const SUIT_SYMBOL: Record<string, string> = {
 };
 
 export const SUIT_COLOR: Record<string, string> = {
-  s: "#1e293b",
-  h: "#e4436b",
-  d: "#3b82f6",
-  c: "#22c55e",
+  s: "#1f1c19", // ink
+  h: "#b8322f", // card red
+  d: "#2b5aa8", // deep blue
+  c: "#2f7a45", // baize green
 };
 
 export interface ParsedCard {
@@ -29,6 +29,6 @@ export function parseCard(card: string): ParsedCard {
     rank: rank === "T" ? "10" : rank,
     suit,
     symbol: SUIT_SYMBOL[suit] ?? "?",
-    color: SUIT_COLOR[suit] ?? "#1e293b",
+    color: SUIT_COLOR[suit] ?? "#1f1c19",
   };
 }

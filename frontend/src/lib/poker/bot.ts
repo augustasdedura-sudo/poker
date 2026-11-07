@@ -15,15 +15,21 @@ interface DifficultyParams {
   betAbove: number; // strength at/above which it bets into an open pot
   bluff: number; // probability of turning a weak hand into aggression
   sizeFrac: number; // bet/raise size as a fraction of the pot
+  stick: number; // how much pot odds tighten calls (lower = calls wider, stickier)
 }
 
+// The bots play loose: they see a lot of flops, call down lighter instead of
+// folding every weak hand, and bluff now and then so the action stays lively and
+// the table is fun (and beatable) to play against. `stick` discounts the pot-odds
+// requirement so a bet does not auto-fold marginal hands.
 const PARAMS: Record<Difficulty, DifficultyParams> = {
-  // Loose-passive: calls a lot, rarely folds, only raises the nuts.
-  easy: { foldBase: 0.16, raiseAbove: 0.85, betAbove: 0.58, bluff: 0.02, sizeFrac: 0.5 },
-  // Reasonable tight-aggressive.
-  medium: { foldBase: 0.28, raiseAbove: 0.7, betAbove: 0.5, bluff: 0.06, sizeFrac: 0.66 },
-  // Tighter, more aggressive and position-aware, with thinner value and bluffs.
-  hard: { foldBase: 0.24, raiseAbove: 0.6, betAbove: 0.44, bluff: 0.12, sizeFrac: 0.75 },
+  // Loose-passive calling station: sticks around with almost anything, rarely
+  // raises, bluffs occasionally. The easiest table to play against.
+  easy: { foldBase: 0.08, raiseAbove: 0.84, betAbove: 0.52, bluff: 0.08, sizeFrac: 0.5, stick: 0.45 },
+  // Loose and a bit aggressive: continues wide and mixes in real bluffs.
+  medium: { foldBase: 0.14, raiseAbove: 0.66, betAbove: 0.46, bluff: 0.16, sizeFrac: 0.62, stick: 0.64 },
+  // Loose-aggressive: applies pressure, value-bets thin and bluffs often.
+  hard: { foldBase: 0.18, raiseAbove: 0.56, betAbove: 0.42, bluff: 0.24, sizeFrac: 0.72, stick: 0.8 },
 };
 
 function snapToBet(value: number, min: number, max: number): number {
@@ -54,7 +60,9 @@ export function decideAction(
   const late = i === state.dealer || i === (state.dealer + 5) % 6;
   const posAdj = late ? 0.04 : 0;
 
-  const continueThresh = Math.max(params.foldBase, potOdds) - posAdj;
+  // `stick` discounts the price so a bet does not scare the bot off marginal
+  // hands -- it calls wider and folds only its genuinely weak holdings.
+  const continueThresh = Math.max(params.foldBase, potOdds * params.stick) - posAdj;
   const raiseThresh = params.raiseAbove - posAdj;
   const betThresh = params.betAbove - posAdj;
   const bluffing = rng() < params.bluff;

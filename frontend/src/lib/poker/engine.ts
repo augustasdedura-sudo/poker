@@ -30,7 +30,8 @@ export interface PlayerState {
 
 export interface GameState {
   id: string;
-  stack: number; // starting stack
+  stack: number; // representative starting stack (the table buy-in); see `stacks`
+  stacks: number[]; // per-seat starting stack (0 = the seat sat this hand out)
   dealer: number;
   players: PlayerState[];
   deck: string[]; // remaining undealt cards (used for the board)
@@ -114,6 +115,15 @@ function findNextToAct(state: GameState, fromIndex: number): number | null {
   return null;
 }
 
+/** First seat after `fromIndex` (exclusive, wrapping) that sat the hand with chips. */
+function firstLiveAfter(stacks: number[], fromIndex: number): number {
+  for (let step = 1; step <= NUM_PLAYERS; step++) {
+    const idx = (fromIndex + step) % NUM_PLAYERS;
+    if (stacks[idx] > 0) return idx;
+  }
+  return fromIndex;
+}
+
 function currentStreetRecord(state: GameState): StreetRecord {
   return state.streets[state.streets.length - 1];
 }
@@ -128,39 +138,58 @@ function postBlind(state: GameState, idx: number, amount: number, label: string)
   state.log.push({ text: `${playerLabel(idx)} posts ${label} - ${put} chips` });
 }
 
-/** Deal a fresh hand: shuffle, deal hole cards, post blinds, set the first actor. */
+/**
+ * Deal a fresh hand: shuffle, deal hole cards to the funded seats, post blinds,
+ * set the first actor.
+ *
+ * `stacks` is either a single stack (a full ring where every seat starts equal --
+ * used by the one-off "manual" mode and the tests) or a per-seat array for a
+ * cash-game table, where a seat with stack 0 sits the hand out. Blind and
+ * first-actor assignment skip the sat-out seats and follow heads-up rules when
+ * only two seats are funded, matching the server's pokerkit replay.
+ */
 export function startHand(
-  stack: number,
+  stacks: number | number[],
   opts: { dealer?: number; rng?: () => number; id?: string } = {},
 ): GameState {
   const rng = opts.rng ?? Math.random;
-  const dealer = opts.dealer ?? Math.floor(rng() * NUM_PLAYERS);
-  const deck = shuffle(freshDeck(), rng);
+  const seatStacks = typeof stacks === "number" ? Array<number>(NUM_PLAYERS).fill(stacks) : stacks.slice();
+  const liveSeats = seatStacks.map((s, i) => (s > 0 ? i : -1)).filter((i) => i >= 0);
 
+  // The button must sit on a funded seat.
+  let dealer = opts.dealer ?? liveSeats[Math.floor(rng() * liveSeats.length)];
+  if (seatStacks[dealer] <= 0) dealer = firstLiveAfter(seatStacks, dealer);
+
+  const deck = shuffle(freshDeck(), rng);
   const players: PlayerState[] = [];
   const log: LogEntry[] = [];
   let cursor = 0;
   for (let i = 0; i < NUM_PLAYERS; i++) {
-    const hole = deck[cursor++] + deck[cursor++];
+    const live = seatStacks[i] > 0;
+    const hole = live ? deck[cursor++] + deck[cursor++] : "";
     players.push({
       index: i,
       holeCards: hole,
-      stack,
+      stack: seatStacks[i],
       committedStreet: 0,
       committedTotal: 0,
-      folded: false,
+      folded: !live, // a sat-out seat is treated as already out of the hand
       allIn: false,
       actedThisRound: false,
     });
-    log.push({ text: `${playerLabel(i)} is dealt ${hole}` });
+    if (live) log.push({ text: `${playerLabel(i)} is dealt ${hole}` });
   }
 
-  const sb = (dealer + 1) % NUM_PLAYERS;
-  const bb = (dealer + 2) % NUM_PLAYERS;
+  // Heads-up: the button posts the small blind and acts first preflop. Three or
+  // more funded seats: small blind is the next funded seat after the button.
+  const headsUp = liveSeats.length === 2;
+  const sb = headsUp ? dealer : firstLiveAfter(seatStacks, dealer);
+  const bb = firstLiveAfter(seatStacks, sb);
 
   const state: GameState = {
     id: opts.id ?? newId(),
-    stack,
+    stack: Math.max(...seatStacks),
+    stacks: seatStacks,
     dealer,
     players,
     deck: deck.slice(cursor),
@@ -183,7 +212,8 @@ export function startHand(
   state.currentBet = state.players[bb].committedStreet;
   state.log.push({ text: "---" });
 
-  // First to act preflop is UTG: the first actable player after the big blind.
+  // First to act preflop is the first funded seat after the big blind (which,
+  // heads-up, is the button / small blind).
   state.toAct = findNextToAct(state, bb);
   if (state.toAct === null) closeRound(state); // everyone already all-in from blinds
   return state;
@@ -370,6 +400,7 @@ export function toRecord(state: GameState): HandRecord {
   return {
     id: state.id,
     stack: state.stack,
+    stacks: state.stacks,
     dealer: state.dealer,
     holeCards: state.players.map((p) => p.holeCards),
     streets: state.streets.map((s) => ({

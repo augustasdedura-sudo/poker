@@ -41,11 +41,11 @@ export function ActionBar({ player, legal, disabled, onAction }: Props) {
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-slate-700 bg-slate-900/70 p-3">
+    <div className="animate-enter flex flex-col gap-3 rounded-2xl border border-white/[0.08] bg-slate-900 p-4 shadow-xl shadow-black/30">
       <div className="text-xs font-medium text-slate-400">
         {player !== null ? (
           <span>
-            <span className="text-teal-300">{playerLabel(player)}</span> to act
+            <span className="text-brass-300">{playerLabel(player)}</span> to act
           </span>
         ) : (
           "Waiting"
@@ -54,7 +54,7 @@ export function ActionBar({ player, legal, disabled, onAction }: Props) {
 
       <div className="flex flex-wrap items-center gap-2">
         <Button
-          className="bg-rose-600 text-white hover:bg-rose-500"
+          className="bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-slate-100"
           disabled={off || !legal.canFold}
           onClick={() => act({ kind: "fold" })}
         >
@@ -63,7 +63,7 @@ export function ActionBar({ player, legal, disabled, onAction }: Props) {
 
         {legal.canCheck ? (
           <Button
-            className="bg-slate-700 text-slate-100 hover:bg-slate-600"
+            className="bg-slate-700 text-slate-50 hover:bg-slate-600"
             disabled={off}
             onClick={() => act({ kind: "check" })}
           >
@@ -71,7 +71,7 @@ export function ActionBar({ player, legal, disabled, onAction }: Props) {
           </Button>
         ) : (
           <Button
-            className="bg-slate-700 text-slate-100 hover:bg-slate-600"
+            className="bg-slate-700 text-slate-50 tabular-nums hover:bg-slate-600"
             disabled={off || !legal.canCall}
             onClick={() => act({ kind: "call" })}
           >
@@ -80,11 +80,11 @@ export function ActionBar({ player, legal, disabled, onAction }: Props) {
         )}
 
         {mode && (
-          <div className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-950/60 px-2 py-1">
+          <div className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-slate-950 py-1 pl-2 pr-1">
             <button
               type="button"
               aria-label="decrease amount"
-              className="h-7 w-7 rounded-md bg-slate-700 text-slate-100 hover:bg-slate-600 disabled:opacity-40"
+              className="h-7 w-7 rounded-md bg-slate-800 text-slate-200 transition-colors duration-150 ease-out hover:bg-slate-700 disabled:opacity-40"
               disabled={off || amount - BIG_BLIND < min}
               onClick={() => setAmount((a) => clamp(a - BIG_BLIND, min, max))}
             >
@@ -98,19 +98,19 @@ export function ActionBar({ player, legal, disabled, onAction }: Props) {
               value={amount}
               disabled={off}
               onChange={(e) => setAmount(snap(Number(e.target.value), min, max))}
-              className="h-1.5 w-32 cursor-pointer accent-teal-400"
+              className="h-1.5 w-32 cursor-pointer accent-[#d6ac5e]"
             />
             <button
               type="button"
               aria-label="increase amount"
-              className="h-7 w-7 rounded-md bg-slate-700 text-slate-100 hover:bg-slate-600 disabled:opacity-40"
+              className="h-7 w-7 rounded-md bg-slate-800 text-slate-200 transition-colors duration-150 ease-out hover:bg-slate-700 disabled:opacity-40"
               disabled={off || amount + BIG_BLIND > max}
               onClick={() => setAmount((a) => clamp(a + BIG_BLIND, min, max))}
             >
               +
             </button>
             <Button
-              className="bg-teal-500 text-slate-950 hover:bg-teal-400"
+              className="min-w-[104px] bg-brass-400 font-semibold text-brass-ink tabular-nums hover:bg-brass-300"
               disabled={off}
               onClick={() => act({ kind: mode, amount })}
             >
@@ -121,11 +121,11 @@ export function ActionBar({ player, legal, disabled, onAction }: Props) {
 
         <Button
           variant="outline"
-          className="border-amber-400/60 bg-transparent text-amber-300 hover:bg-amber-400/10"
+          className="border-clay-500/50 bg-transparent text-clay-300 tabular-nums hover:bg-clay-500/10 hover:text-clay-300"
           disabled={off || !legal.canAllin}
           onClick={() => act({ kind: "allin" })}
         >
-          ALL-IN {legal.canAllin ? legal.allinChips.toLocaleString() : ""}
+          All-in {legal.canAllin ? legal.allinChips.toLocaleString() : ""}
         </Button>
       </div>
     </div>

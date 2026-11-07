@@ -1,39 +1,44 @@
 import { parseCard } from "@/lib/poker/cardFormat";
 import { cn } from "@/lib/utils";
 
-type Size = "sm" | "md";
+type Size = "sm" | "md" | "lg";
 
 const SIZES: Record<Size, string> = {
-  sm: "w-9 h-[52px]",
+  sm: "w-10 h-[58px]",
   md: "w-12 h-[70px]",
+  lg: "w-[78px] h-[110px]",
 };
 
-const RANK_TEXT: Record<Size, string> = { sm: "text-sm", md: "text-lg" };
-const SUIT_TEXT: Record<Size, string> = { sm: "text-base", md: "text-2xl" };
+const RANK_TEXT: Record<Size, string> = { sm: "text-sm", md: "text-lg", lg: "text-3xl" };
+const SUIT_TEXT: Record<Size, string> = { sm: "text-lg", md: "text-2xl", lg: "text-5xl" };
 
 export function PlayingCard({
   card,
   size = "sm",
   faceDown = false,
   delay = 0,
+  flip = false,
 }: {
   card?: string;
   size?: Size;
   faceDown?: boolean;
   delay?: number; // staggered deal-in delay, in ms
+  flip?: boolean; // turn over in place (community cards) instead of sliding in
 }) {
   const style = delay ? { animationDelay: `${delay}ms` } : undefined;
+  const motion = flip ? "animate-flip" : "animate-card";
 
   if (faceDown || !card) {
     return (
       <div
-        style={style}
+        style={{ ...style, background: "linear-gradient(160deg, #7a2a2f 0%, #4c171b 100%)" }}
         className={cn(
-          "animate-card flex items-center justify-center rounded-md bg-gradient-to-br from-teal-500 to-cyan-800 ring-1 ring-black/30 shadow",
+          "flex items-center justify-center rounded-md shadow-md shadow-black/40 ring-1 ring-black/50",
+          motion,
           SIZES[size],
         )}
       >
-        <div className="h-3/5 w-3/5 rounded-[3px] border border-white/30" />
+        <div className="h-[78%] w-[74%] rounded-[3px] border border-[#f3e7cf]/25" />
       </div>
     );
   }
@@ -41,9 +46,10 @@ export function PlayingCard({
   const { rank, symbol, color } = parseCard(card);
   return (
     <div
-      style={style}
+      style={{ ...style, background: "linear-gradient(180deg, #faf6ee 0%, #ece5d7 100%)" }}
       className={cn(
-        "animate-card flex flex-col items-center justify-center rounded-md bg-white shadow-md ring-1 ring-black/10",
+        "flex flex-col items-center justify-center rounded-md shadow-md shadow-black/40 ring-1 ring-black/15",
+        motion,
         SIZES[size],
       )}
     >
@@ -59,5 +65,5 @@ export function PlayingCard({
 
 /** An empty outlined slot for a community card not yet dealt. */
 export function CardSlot({ size = "md" }: { size?: Size }) {
-  return <div className={cn("rounded-md border-2 border-dashed border-white/15", SIZES[size])} />;
+  return <div className={cn("rounded-md border border-dashed border-[#f3e7cf]/20 bg-black/[0.06]", SIZES[size])} />;
 }

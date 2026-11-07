@@ -1,14 +1,17 @@
+"use client";
+
 import { cn } from "@/lib/utils";
+import { useTween } from "@/lib/useTween";
 
 // A small stacked-chips graphic with an amount label. The chip colour reflects
-// the bet size (classic casino denominations), purely for visual flavour.
+// the bet size (classic casino denominations, in clay-chip tones).
 
 function chipColor(amount: number): string {
-  if (amount < 40) return "#94a3b8"; // slate
-  if (amount < 100) return "#ef4444"; // red
-  if (amount < 500) return "#22c55e"; // green
-  if (amount < 2000) return "#3b82f6"; // blue
-  return "#f59e0b"; // gold
+  if (amount < 40) return "#d9d1c1"; // bone
+  if (amount < 100) return "#b8452f"; // clay red
+  if (amount < 500) return "#2f7a4a"; // green
+  if (amount < 2000) return "#2f4f86"; // blue
+  return "#c99a46"; // brass
 }
 
 type Size = "sm" | "md";
@@ -22,6 +25,7 @@ export function Chips({
   size?: Size;
   className?: string;
 }) {
+  const shown = useTween(amount);
   const color = chipColor(amount);
   const disc = size === "md" ? 18 : 14;
   const offset = size === "md" ? 4 : 3;
@@ -36,25 +40,25 @@ export function Chips({
         {chips.map((i) => (
           <span
             key={i}
-            className="absolute left-0 rounded-full border border-dashed"
+            className="absolute left-0 rounded-full border border-dashed transition-colors duration-300 ease-out"
             style={{
               width: disc,
               height: disc,
               bottom: i * offset,
               background: color,
-              borderColor: "rgba(255,255,255,0.65)",
-              boxShadow: "0 1px 2px rgba(0,0,0,0.5)",
+              borderColor: "rgba(255,250,240,0.6)",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.45)",
             }}
           />
         ))}
       </span>
       <span
         className={cn(
-          "font-semibold text-amber-100",
-          size === "md" ? "text-sm" : "text-[11px]",
+          "font-mono font-medium tabular-nums text-slate-100",
+          size === "md" ? "text-sm" : "text-xs",
         )}
       >
-        {amount.toLocaleString()}
+        {shown.toLocaleString()}
       </span>
     </span>
   );

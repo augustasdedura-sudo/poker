@@ -20,9 +20,10 @@ export interface StreetRecord {
 /** The complete hand the client sends to the backend on completion. */
 export interface HandRecord {
   id: string;
-  stack: number;
+  stack: number; // representative buy-in (see `stacks`)
+  stacks: number[]; // per-seat starting stack (0 = sat out); index 0..5
   dealer: number;
-  holeCards: string[]; // index 0..5, e.g. "Tc2c"
+  holeCards: string[]; // index 0..5, e.g. "Tc2c" ("" for a sat-out seat)
   streets: StreetRecord[];
 }
 
