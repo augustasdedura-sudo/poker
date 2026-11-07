@@ -8,7 +8,7 @@ export function LogPanel({ log }: { log: LogEntry[] }) {
       <h2 className="mb-2 text-sm font-medium text-slate-300">Playing field log</h2>
       <div
         data-testid="play-log"
-        className="h-80 overflow-y-auto rounded-2xl border border-white/[0.08] bg-slate-900 p-4 font-mono text-[13px] leading-relaxed text-slate-300"
+        className="h-80 overflow-y-auto rounded-lg border border-white/[0.08] bg-slate-900/95 p-4 font-mono text-[13px] leading-relaxed text-slate-300 xl:h-[calc(100vh-140px)]"
       >
         {log.length === 0 ? (
           <p className="text-slate-500">Press Start to deal a new hand</p>

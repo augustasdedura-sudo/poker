@@ -11,8 +11,10 @@ WORKDIR /app
 
 RUN pip install "poetry==1.8.4"
 
-# Install dependencies first (better layer caching). README is referenced by pyproject.
-COPY pyproject.toml README.md ./
+# Install dependencies first (better layer caching). The lock file pins every
+# version, so the image builds the same set that was tested. README is
+# referenced by pyproject.
+COPY pyproject.toml poetry.lock README.md ./
 RUN poetry install --no-root --only main
 
 # Application code

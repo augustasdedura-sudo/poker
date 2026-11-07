@@ -31,7 +31,7 @@ _FULL_DECK = [r + s for r in _RANKS for s in _SUITS]  # our format: rank+suit, e
 
 
 def _split(cards: str) -> list[str]:
-    return [cards[i : i + 2] for i in range(0, len(cards), 2)]
+    return [cards[i:i + 2] for i in range(0, len(cards), 2)]
 
 
 def _to_rlcard(card: str) -> str:
@@ -55,8 +55,8 @@ def equity(hole: str, board: str, opponents: int, trials: int = 240) -> float:
     for _ in range(trials):
         random.shuffle(deck)
         drawn = deck[:draws]
-        opp_holes = [drawn[i * 2 : i * 2 + 2] for i in range(opponents)]
-        full_board = shared + drawn[opponents * 2 :]
+        opp_holes = [drawn[2 * i:2 * i + 2] for i in range(opponents)]
+        full_board = shared + drawn[2 * opponents:]
         hands = [[_to_rlcard(c) for c in my_hole + full_board]]
         hands += [[_to_rlcard(c) for c in oh + full_board] for oh in opp_holes]
         winners = compare_hands(hands)
@@ -143,7 +143,8 @@ def decide(req: BotRequest) -> BotDecision:
     if req.to_call > 0:
         pot_odds = req.to_call / (pot + req.to_call)
         if legal.can_raise and eq > 0.85:
-            rl = RLAction.ALL_IN if (eq > 0.92 and r < 0.4 and legal.can_allin) else RLAction.RAISE_POT
+            shove = eq > 0.92 and r < 0.4 and legal.can_allin
+            rl = RLAction.ALL_IN if shove else RLAction.RAISE_POT
         elif legal.can_raise and eq > 0.62 and r < 0.55:
             rl = RLAction.RAISE_HALF_POT
         elif eq + 0.02 >= pot_odds:

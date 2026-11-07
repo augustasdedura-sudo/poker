@@ -31,12 +31,19 @@ docker compose down -v
 
 1. Set the **Stacks** value (default 10000) and press **Apply** to set every player's stack.
 2. Press **Start** to deal a hand. (The button is renamed **Reset** after the first action.)
-3. Act for each player with **Fold / Check / Call / Bet / Raise / ALLIN**. Illegal actions are
-   disabled. **Bet** and **Raise** have `-` / `+` controls that step by the big blind (40).
+3. Act for each player with **Fold / Check / Call / Bet / Raise / Allin**. All six are always shown
+   and illegal ones are disabled. The Bet/Raise amount has `-` / `+` controls that step by the big
+   blind (40), plus quick sizes (Min, ½ Pot, ¾ Pot, Pot, Max), a slider and a typed amount.
 4. When the hand ends it is POSTed to the backend, which computes each player's win/loss, stores it,
    and the frontend refreshes the hand-history panel.
 
+The page opens in **Manual** mode, the game described above. **You vs AI** is an extra mode where
+you play Player 1 as a cash game against five bots.
+
 Blinds are small blind 20 / big blind 40. Players are `Player 1`..`Player 6`.
+
+Backend style check (PEP 8, 99-character lines as configured in `backend/setup.cfg`):
+`pip install pycodestyle && pycodestyle src tests main.py` from `backend/`.
 
 ## Tests
 
@@ -76,7 +83,7 @@ poker/
   frontend/                 # Next.js + React + TypeScript + shadcn/ui
     src/lib/poker/          # pure game logic: cards, engine, format, types
     src/lib/api.ts          # REST client
-    src/components/         # PokerApp, PlayingField, ActionButtons, HandHistory, ui/
+    src/components/         # PokerApp, HandHistory, poker/ (table, ActionBar, LogPanel), ui/
     src/app/                # single-page App Router entry
 ```
 

@@ -2,14 +2,14 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { ScrollText } from "lucide-react";
-
-import { HistoryDrawer } from "@/components/HistoryDrawer";
+import { HandHistory } from "@/components/HandHistory";
 import { ActionBar } from "@/components/poker/ActionBar";
+import { LogPanel } from "@/components/poker/LogPanel";
 import { PokerTable } from "@/components/poker/PokerTable";
 import { RoomBackdrop } from "@/components/poker/RoomBackdrop";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SegmentedControl } from "@/components/ui/segmented";
 import { createHand, fetchHands } from "@/lib/api";
 import { useTween } from "@/lib/useTween";
 import { cn } from "@/lib/utils";
@@ -55,7 +55,7 @@ function actionBubble(a: HandAction): string {
     case "raise":
       return `Raise ${a.amount?.toLocaleString()}`;
     case "allin":
-      return "All-in";
+      return "Allin";
   }
 }
 
@@ -68,21 +68,9 @@ export function PokerApp() {
   const [everActed, setEverActed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showPanels, setShowPanels] = useState(false);
-  const closePanels = useCallback(() => setShowPanels(false), []);
-
-  // "H" toggles the log & history drawer (ignored while typing in a field).
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const el = e.target as HTMLElement | null;
-      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.key === "h" || e.key === "H") setShowPanels((v) => !v);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-  const [mode, setMode] = useState<"solo" | "manual">("solo");
+  // Manual (one person acts for all six seats) is the exercise's game; playing
+  // against bots is an extra mode.
+  const [mode, setMode] = useState<"solo" | "manual">("manual");
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
 
   // Cash-game session (solo mode): a persistent bankroll per seat and a rotating
@@ -259,68 +247,47 @@ export function PokerApp() {
   return (
     <main className="relative min-h-screen text-slate-100">
       <RoomBackdrop />
-      <div className="mx-auto max-w-[1440px] px-6 py-5">
+      <div className="mx-auto max-w-[1840px] px-6 py-5">
         {/* Header */}
         <header className="relative z-10 mb-4 flex flex-wrap items-center justify-between gap-4">
           <h1 className="text-lg font-semibold leading-none text-slate-50">
             <span className="text-brass-400">♠</span> 6-max Hold&apos;em
           </h1>
           <div className="flex flex-wrap items-end gap-2">
-            <div className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-slate-400">Mode</span>
-              <div className="flex rounded-lg border border-white/[0.08] bg-slate-900 p-0.5 text-xs">
-                {(["solo", "manual"] as const).map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => {
-                      if (m === mode) return;
-                      clearNextHand();
-                      setMode(m);
-                      setGame(null);
-                      setLastHand(null);
-                      setTable(null);
-                    }}
-                    className={cn(
-                      "flex h-8 items-center rounded-md px-3 font-medium duration-150 ease-out transition-colors",
-                      mode === m
-                        ? "bg-slate-700 text-slate-50 shadow-sm"
-                        : "text-slate-400 hover:text-slate-200",
-                    )}
-                  >
-                    {m === "solo" ? "You vs AI" : "Manual"}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <SegmentedControl
+              label="Mode"
+              value={mode}
+              options={[
+                { value: "solo", label: "You vs AI" },
+                { value: "manual", label: "Manual" },
+              ]}
+              onChange={(m) => {
+                if (m === mode) return;
+                clearNextHand();
+                setMode(m);
+                setGame(null);
+                setLastHand(null);
+                setTable(null);
+              }}
+            />
             {isSolo && (
-              <div className="flex flex-col gap-1">
-                <span className="text-xs font-medium text-slate-400">Difficulty</span>
-                <div className="flex rounded-lg border border-white/[0.08] bg-slate-900 p-0.5 text-xs">
-                  {(["easy", "medium", "hard"] as const).map((d) => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => setDifficulty(d)}
-                      className={cn(
-                        "flex h-8 items-center rounded-md px-3 font-medium duration-150 ease-out capitalize transition-colors",
-                        difficulty === d
-                          ? "bg-slate-700 text-slate-50 shadow-sm"
-                          : "text-slate-400 hover:text-slate-200",
-                      )}
-                    >
-                      {d}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <SegmentedControl
+                label="Difficulty"
+                value={difficulty}
+                options={[
+                  { value: "easy", label: "Easy" },
+                  { value: "medium", label: "Medium" },
+                  { value: "hard", label: "Hard" },
+                ]}
+                onChange={setDifficulty}
+              />
             )}
 
             {seated ? (
               <>
                 <div className="flex flex-col gap-1">
                   <span className="text-xs font-medium text-slate-400">Your stack</span>
-                  <div className="flex h-9 min-w-[96px] items-center justify-end rounded-lg border border-white/[0.08] bg-slate-900 px-3 font-mono text-sm tabular-nums text-slate-50">
+                  <div className="flex h-9 min-w-[104px] items-center justify-end rounded-md border border-white/[0.06] bg-[#0d0c0b] px-3 font-mono text-sm font-medium tabular-nums text-[#ede8df] shadow-[inset_0_1px_3px_rgba(0,0,0,0.7)]">
                     {heroStackShown.toLocaleString()}
                   </div>
                 </div>
@@ -337,7 +304,7 @@ export function PokerApp() {
                     min={BIG_BLIND}
                     value={stackInput}
                     onChange={(e) => setStackInput(e.target.value)}
-                    className="h-9 w-28 rounded-lg font-mono tabular-nums"
+                    className="h-9 w-28 rounded-md border-white/[0.06] bg-[#0d0c0b] font-mono tabular-nums shadow-[inset_0_1px_3px_rgba(0,0,0,0.7)]"
                   />
                 </label>
                 <Button variant="primary" onClick={sitDown}>
@@ -353,7 +320,7 @@ export function PokerApp() {
                     min={1}
                     value={stackInput}
                     onChange={(e) => setStackInput(e.target.value)}
-                    className="h-9 w-28 rounded-lg font-mono tabular-nums"
+                    className="h-9 w-28 rounded-md border-white/[0.06] bg-[#0d0c0b] font-mono tabular-nums shadow-[inset_0_1px_3px_rgba(0,0,0,0.7)]"
                   />
                 </label>
                 <Button variant="outline" onClick={applyStack}>
@@ -364,16 +331,6 @@ export function PokerApp() {
                 </Button>
               </>
             )}
-
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Log and history"
-              title="Log and history (H)"
-              onClick={() => setShowPanels(true)}
-            >
-              <ScrollText strokeWidth={1.5} />
-            </Button>
           </div>
         </header>
 
@@ -383,12 +340,23 @@ export function PokerApp() {
           </p>
         )}
 
-        {/* Table + actions */}
-        <section className="animate-enter">
+        {/* Play log (left) · table + actions (middle) · hand history (right) */}
+        <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[280px_minmax(0,1fr)_320px]">
+        <aside className="relative z-10 order-2 xl:order-1">
+          <LogPanel log={game?.log ?? []} />
+        </aside>
+        <section className="animate-enter order-1 min-w-0 xl:order-2">
           <PokerTable game={game} fallbackStack={seated ? heroStack : stack} result={lastHand} hero={HERO} solo={isSolo} flash={flash} />
-          <div className="mx-auto mt-4 max-w-3xl">
+          <div className="mx-auto mt-12 max-w-[40rem]">
             {heroTurn ? (
-              <ActionBar player={game!.toAct} legal={legal} disabled={busy} onAction={onAction} />
+              <ActionBar
+                player={game!.toAct}
+                legal={legal}
+                disabled={busy}
+                onAction={onAction}
+                pot={game!.players.reduce((sum, p) => sum + p.committedTotal, 0)}
+                currentBet={game!.currentBet}
+              />
             ) : heroBusted ? (
               <div className="animate-enter flex flex-col items-center gap-3 rounded-2xl border border-clay-500/30 bg-slate-900 p-4 text-center">
                 <p className="text-sm font-medium text-clay-300">
@@ -445,10 +413,11 @@ export function PokerApp() {
             )}
           </div>
         </section>
+        <aside className="relative z-10 order-3">
+          <HandHistory hands={history} />
+        </aside>
+        </div>
       </div>
-
-      {/* Log + history live in a slide-out drawer (header icon or the H key) */}
-      <HistoryDrawer open={showPanels} onClose={closePanels} log={game?.log ?? []} hands={history} />
     </main>
   );
 }

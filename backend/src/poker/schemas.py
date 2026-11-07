@@ -95,7 +95,10 @@ class HandOut(_Camel):
                 StreetIn(
                     street=s.street,
                     board=s.board,
-                    actions=[ActionIn(player=a.player, kind=a.kind, amount=a.amount) for a in s.actions],
+                    actions=[
+                        ActionIn(player=a.player, kind=a.kind, amount=a.amount)
+                        for a in s.actions
+                    ],
                 )
                 for s in hand.streets
             ],

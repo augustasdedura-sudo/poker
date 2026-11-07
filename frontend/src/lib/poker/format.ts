@@ -89,8 +89,15 @@ function positionsLine(hand: StoredHand): string {
   const d = hand.dealer;
   const sb = (d + 1) % 6;
   const bb = (d + 2) % 6;
+  // One number when every seat started equal (the normal case); otherwise list
+  // each seat's starting stack so the line stays true for cash-game hands.
+  const stacks = hand.stacks ?? [];
+  const uniform = stacks.length === 0 || stacks.every((s) => s === stacks[0]);
+  const stackPart = uniform
+    ? `Stack ${stacks[0] ?? hand.stack}`
+    : `Stacks ${stacks.map((s, i) => `${playerLabel(i)} ${s}`).join(", ")}`;
   return (
-    `Stack ${hand.stack}; Dealer: ${playerLabel(d)}; ` +
+    `${stackPart}; Dealer: ${playerLabel(d)}; ` +
     `${playerLabel(sb)} Small blind; ${playerLabel(bb)} Big blind`
   );
 }

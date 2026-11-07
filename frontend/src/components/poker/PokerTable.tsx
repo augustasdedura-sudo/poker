@@ -100,7 +100,7 @@ export function PokerTable({ game, fallbackStack, result, hero, solo, flash }: P
     : 0;
 
   return (
-    <div className="relative mx-auto aspect-[16/9] w-full max-w-[min(86rem,140vh)] select-none">
+    <div className="relative mx-auto aspect-[16/9] w-full max-w-[min(86rem,116vh)] select-none">
       {/* Shadow the table throws on the carpet */}
       <div
         className="absolute inset-x-[6%] bottom-[-2%] top-[10%] rounded-[50%] blur-2xl"

@@ -153,6 +153,90 @@
   animation: enter 480ms var(--ease) both;
 }
 
+/* ---- Bet slider ----------------------------------------------------------
+   A groove cut into the action bar (dark, inner shadow) that fills with brass
+   up to the bet, and a small brass knob with a lit top edge. Replaces the
+   browser's default blue/grey control, which is the loudest "template" tell
+   in a form row. The fill comes from --fill (0–100%), set inline. */
+.bet-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 20px;
+  background: transparent;
+  cursor: pointer;
+}
+.bet-range:focus-visible {
+  outline: none;
+}
+.bet-range:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+.bet-range::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(
+    90deg,
+    #b88e42 0%,
+    #d6ac5e var(--fill, 0%),
+    #0b0a09 var(--fill, 0%),
+    #0b0a09 100%
+  );
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.75),
+    0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.bet-range::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: #0b0a09;
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.75),
+    0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.bet-range::-moz-range-progress {
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #b88e42, #d6ac5e);
+}
+.bet-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: -6px;
+  border-radius: 50%;
+  border: 1px solid rgba(40, 26, 6, 0.6);
+  background: linear-gradient(180deg, #ecd197 0%, #d6ac5e 45%, #a8803c 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 246, 220, 0.7),
+    0 1px 3px rgba(0, 0, 0, 0.6);
+  transition: transform 150ms var(--ease), box-shadow 150ms var(--ease);
+}
+.bet-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid rgba(40, 26, 6, 0.6);
+  background: linear-gradient(180deg, #ecd197 0%, #d6ac5e 45%, #a8803c 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 246, 220, 0.7),
+    0 1px 3px rgba(0, 0, 0, 0.6);
+}
+.bet-range:active::-webkit-slider-thumb {
+  transform: scale(1.08);
+}
+.bet-range:focus-visible::-webkit-slider-thumb {
+  box-shadow:
+    0 0 0 3px rgba(214, 172, 94, 0.35),
+    inset 0 1px 0 rgba(255, 246, 220, 0.7),
+    0 1px 3px rgba(0, 0, 0, 0.6);
+}
+.bet-range:focus-visible::-moz-range-thumb {
+  box-shadow:
+    0 0 0 3px rgba(214, 172, 94, 0.35),
+    inset 0 1px 0 rgba(255, 246, 220, 0.7);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-card,
   .animate-flip,

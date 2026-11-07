@@ -81,7 +81,8 @@ class PostgresHandRepository:
     def add(self, hand: Hand) -> Hand:
         self._conn.execute(
             """
-            INSERT INTO hands (id, stack, dealer, hole_cards, streets, winnings, pot, created_at, stacks)
+            INSERT INTO hands
+                (id, stack, dealer, hole_cards, streets, winnings, pot, created_at, stacks)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             """,
             (
