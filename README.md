@@ -117,9 +117,13 @@ rejected — this is the server-side validation that mirrors the client engine.
 
 ## Notes / caveats
 
-- The project was authored on a machine without Docker running, so the Python and TypeScript test
-  suites and the Next.js production build were all run and pass locally, but the full
-  `docker compose up` path should be confirmed on your Docker host.
+- The full `docker compose up -d --build` path has been run end to end: all three containers come
+  up, the site serves on http://localhost:3000, and hands post and reload through the database.
 - The log phrasing follows the brief's example. The brief's example is internally inconsistent about
   a trailing "chips" on raises (`raises to 300 chips` vs `raises to 160`); this app is consistent and
   omits "chips" on bet/raise/call lines (blind-posting lines keep it, as in the example).
+
+## License
+
+Personal, non-commercial project — see [LICENSE](LICENSE). All rights reserved; shared for
+evaluation and personal, non-commercial use only.

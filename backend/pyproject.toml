@@ -2,7 +2,8 @@
 name = "poker-backend"
 version = "0.1.0"
 description = "Backend for the simplified 6-max Texas Hold'em app (FastAPI + PostgreSQL)."
-authors = ["Poker exercise"]
+authors = ["augustasdedura-sudo"]
+license = "LicenseRef-Proprietary-NonCommercial"
 readme = "README.md"
 # src/ layout: the package lives under src/, main.py stays at the project root.
 packages = [{ include = "poker", from = "src" }]
